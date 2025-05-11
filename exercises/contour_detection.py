@@ -7,8 +7,10 @@
 
 请补全下面的函数 `contour_detection`。
 """
+
 import cv2
 import numpy as np
+
 
 def contour_detection(image_path):
     """
@@ -29,4 +31,34 @@ def contour_detection(image_path):
     # 7. 使用 cv2.drawContours() 在副本上绘制轮廓。
     # 8. 返回绘制后的图像和轮廓列表。
     # 9. 使用 try...except 处理异常。
-    pass 
+    try:
+        # 1. 读取图像
+        img = cv2.imread(image_path)
+        if img is None:
+            return None, None
+
+        # 2. 转为灰度图
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        # 3. 二值化处理
+        _, binary = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+
+        # 4. 检测轮廓（兼容不同OpenCV版本）
+        contours, _ = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        # 确保contours是列表类型
+        if isinstance(contours, tuple):
+            contours = contours[0]  # OpenCV 3.x/4.x返回元组(contours, hierarchy)
+
+        # 5. 创建图像副本用于绘制
+        img_copy = img.copy()
+
+        # 6. 绘制轮廓（绿色，线宽2）
+        cv2.drawContours(img_copy, contours, -1, (0, 255, 0), 2)
+
+        return img_copy, list(contours)  # 确保返回列表
+
+    except Exception as e:
+        print(f"轮廓检测错误: {e}")
+        return None, None
+    pass
